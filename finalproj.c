@@ -8,18 +8,23 @@ int printBill();
 
     const float TAX_RATE = 1.0725;
 
-    const float FOOD1_COST = 0.00;
-    const float FOOD2_COST = 0.00;
-    const float FOOD3_COST = 0.00;
-    // ...
+    const float FOOD1_INDEX = 0;
+    const float FOOD2_INDEX = 1;
+    const float FOOD3_INDEX = 2;
+    //...
 
-    const float DRINK1_COST = 0.00;
-    const float DRINK2_COST = 0.00;
-    const float DRINK3_COST = 0.00;
-    // ...
+    const float DRINK1_INDEX = 0;
+    const float DRINK2_INDEX = 1;
+    const float DRINK3_INDEX = 2;
+    //...
 
-    int food1Count, food2Count, food3Count = 0;
-    int drink1Count, drink2Count, drink3Count = 0;
+    //                         f1    f2    f3    f4    f5    f6    f7    f8    f9   f10
+    int foodCosts[10]      = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
+    int foodQuantities[10] = {0};
+
+    //                         d1    d2    d3    d4    d5
+    int drinkCosts[5]      = {0.00, 0.00, 0.00, 0.00, 0.00};
+    int drinkQuantities[5] = {0};
 
 int main(void)
 {
