@@ -1,43 +1,42 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-int addToOrder();
-int editOrder();
-int completeOrder();
-int printBill();
+void addToOrder();
+void editOrder();
+void completeOrder();
+void printBill();
+void checkScanBuffer();
 
-    const float TAX_RATE = 1.0725;
+const float TAX_RATE = 1.0725;
 
-    const float FOOD1_INDEX = 0;
-    const float FOOD2_INDEX = 1;
-    const float FOOD3_INDEX = 2;
-    //...
+const char *FOOD_NAMES[10] = { "Burger", "Cheeseburger", "Hot Dog", "Burrito", "Chicken Tenders", "Pizza", "Salad", "Fries", "Onion Rings", "Mac & Cheese" };
+const int FOOD_COUNT = 10;
+//                        f1    f2    f3    f4    f5    f6    f7    f8    f9   f10
+float FOOD_PRICES[10] = {7.49, 7.99, 6.99, 8.99, 6.49, 10.99, 5.99, 3.99, 5.49, 5.99};
+int foodQuantities[10] = {0};
 
-    const float DRINK1_INDEX = 0;
-    const float DRINK2_INDEX = 1;
-    const float DRINK3_INDEX = 2;
-    //...
+const char *DRINK_NAMES[5] = { "Water", "Soda", "Lemonade", "Iced Tea", "Smoothie" };
+const int DRINK_COUNT = 5;
+//                        d1    d2    d3    d4    d5
+float DRINK_PRICES[5] = {0.00, 2.99, 3.99, 3.99, 5.99};
+int drinkQuantities[5] = {0};
 
-    //                         f1    f2    f3    f4    f5    f6    f7    f8    f9   f10
-    int foodCosts[10]      = {0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00};
-    int foodQuantities[10] = {0};
-
-    //                         d1    d2    d3    d4    d5
-    int drinkCosts[5]      = {0.00, 0.00, 0.00, 0.00, 0.00};
-    int drinkQuantities[5] = {0};
+int gScanVal = 0;
 
 int main(void)
 {
     bool systemActive = true;
-    int userInput = 0;
+    int userInput;
 
-    printf("Welcome to ___ Restaurant!\n");
+    printf("Welcome!");
 
     while(systemActive)
     {
-        printf("What would you like to do?\n");
+        userInput = -1;
+
+        printf("\nWhat would you like to do?\n");
         printf("1) Add to Order\n2) Edit Order\n3) Complete Order\n0) Exit\n\n");
-        scanf("%d", &userInput);
+        gScanVal = scanf("%d", &userInput);
 
         switch(userInput)
         {
@@ -58,36 +57,214 @@ int main(void)
                 printf("Error: Invalid Input! Please Try Again\n\n");
                 break;
         }
+
+        checkScanBuffer();
     }
     return 0;
 }
 
 
-int addToOrder()
+void addToOrder()
 {
-    // TODO
-    // Should prompt user for..
-    //    1) Add Food or Drink?
-    //    2) Which Food/Drink? (list available options + prices)
-    //    3) How many of selected Food/Drink?
-    //    4) Add another item?
+    int choice, item, quantity = 0;
+    int addingItem = 1;
+
+    while (addingItem)
+    {
+        checkScanBuffer();
+
+        printf("\nWould you like Food or Drink?\n");
+        printf("1) Food\n");
+        printf("2) Drink\n");
+        printf("0) Exit\n\n");
+        printf("Enter choice: ");
+        gScanVal = scanf("%d", &choice);
+
+        if (choice == 0)
+        {
+            return;
+        }
+
+        if (choice == 1)
+        {
+            printf("\n--- Food Menu ---\n");
+            for(int i = 0; i < FOOD_COUNT; i++)
+            {
+                printf("%2d) %-15s - $%.2f\n", i+1, FOOD_NAMES[i], FOOD_PRICES[i]);
+            }
+
+            printf("Choose a food item: ");
+            gScanVal = scanf("%d", &item);
+
+            if (item < 1 || item > FOOD_COUNT)
+            {
+                printf("Invalid food choice!\n");
+                continue;
+            }
+
+            printf("How many would you like? ");
+            gScanVal = scanf("%d", &quantity);
+
+            if (quantity <= 0)
+            {
+                printf("Invalid quantity!\n");
+                continue;
+            }
+
+            foodQuantities[item-1] += quantity;
+
+            printf("Food added to order!\n");
+        }
+        else if (choice == 2)
+        {
+            printf("\n--- Drink Menu ---\n");
+            for(int i = 0; i < DRINK_COUNT; i++)
+            {
+                printf("%2d) %-8s - $%.2f\n", i+1, DRINK_NAMES[i], DRINK_PRICES[i]);
+            }
+
+            printf("Choose a drink: ");
+            gScanVal = scanf("%d", &item);
+
+            if (item < 1 || item > DRINK_COUNT)
+            {
+                printf("Invalid drink choice!\n");
+                continue;
+            }
+
+            printf("How many would you like? ");
+            gScanVal = scanf("%d", &quantity);
+
+            if (quantity <= 0)
+            {
+                printf("Invalid quantity!\n");
+                continue;
+            }
+
+            drinkQuantities[item-1] += quantity;
+
+            printf("Drink added to order!\n");
+        }
+        else
+        {
+            printf("Invalid choice! Please try again.\n");
+            continue;
+        }
+
+        addingItem = 0;
+        printf("\nWould you like to add another item?\n1) Yes\n0) No\n\n");
+        gScanVal = scanf("%d", &addingItem);
+
+        checkScanBuffer();
+    }
+
+    printf("\nReturning to main menu...\n");
 }
 
 
-int editOrder()
+bool editItems(const char *itemType, const char *itemNames[], float itemPrices[], int itemQuantities[], int itemCount)
 {
-    // TODO
-    // Let user either..
-    //    1) Edit quantity of an item
-    //        a) Item to modify
-    //        b) New quantity
-    //    2) Remove an item
-    //        a) Item to remove
-    //        b) Confirm y/n
+    int optCount = 0;
+
+    for (int i = 0; i < itemCount; ++i)
+    {
+        if (itemQuantities[i] == 0) continue;
+        ++optCount;
+        break;
+    }
+
+    if (optCount == 0)
+    {
+        printf("\nThere are no %ss in your order.\n", itemType);
+        return false;
+    }
+
+    printf("\nEdit quantity of %s\n", itemType);
+
+    optCount = 0;
+    printf("     Item           Quantity   Total Price\n");
+
+    for (int i = 0; i < itemCount; ++i)
+    {
+        if (itemQuantities[i] == 0)
+            continue;
+        printf("%d) %-15s    %3d        $%.2f\n", ++optCount, itemNames[i], itemQuantities[i], itemQuantities[i] * itemPrices[i]);
+    }
+
+    printf("0) Exit\n\n");
+    int opt;
+    gScanVal = scanf("%d", &opt);
+
+    if (opt == 0)
+        return false;
+
+    int itemIdx = -1;
+    optCount = 0;
+
+    for (int i = 0; i < itemCount; ++i)
+    {
+        if (itemQuantities[i] == 0)
+            continue;
+        if (opt == ++optCount)
+        {
+            itemIdx = i;
+            break;
+        }
+    }
+
+    if (itemIdx == -1)
+    {
+        printf("\nUnknown option, please choose from listed choices!\n");
+    }
+    else
+    {
+        printf("\nEnter new quantity of %s: ", itemNames[itemIdx]);
+        int newQuantity = -1;
+        gScanVal = scanf("%d", &newQuantity);
+        if (newQuantity >= 0)
+        {
+            itemQuantities[itemIdx] = newQuantity;
+        }
+        else
+        {
+            printf("\nFailed to set quantity!\n");
+        }
+    }
+
+    checkScanBuffer();
+
+    return true;
+}
+
+void editOrder()
+{
+    while(true)
+    {
+        printf("\nWould you like to edit amount of food or drinks?\n1) Food\n2) Drinks\n0) Exit\n\n");
+        int opt = 0;
+        gScanVal = scanf("%d", &opt);
+
+        switch (opt)
+        {
+            case 0:
+                return;
+            case 1:
+                while (editItems("Food", FOOD_NAMES, FOOD_PRICES, foodQuantities, FOOD_COUNT));
+                break;
+            case 2:
+                while (editItems("Drink", DRINK_NAMES, DRINK_PRICES, drinkQuantities, DRINK_COUNT));
+                break;
+            default:
+                printf("Unknown option, please choose from listed choices!\n");
+                break;
+        }
+
+        checkScanBuffer();
+    }
 }
 
 
-int completeOrder()
+void completeOrder()
 {
     // TODO
     // Call printBill() to display user's current order
@@ -96,7 +273,7 @@ int completeOrder()
 }
 
 
-int printBill()
+void printBill()
 {
     // TODO
     // Print out the user's current order
@@ -107,4 +284,15 @@ int printBill()
     //    4) Subtotal
     //    5) Tax
     //    6) Total (Subtotal + Tax)
+}
+
+
+// Check to prevent infinite loops occuring from invalid char inputs
+void checkScanBuffer()
+{
+    if(gScanVal != 1)
+    {
+        char dummyChar[50];
+        gScanVal = scanf("%s", dummyChar);
+    }
 }
