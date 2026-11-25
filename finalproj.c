@@ -264,26 +264,96 @@ void editOrder()
 }
 
 
+// Returns true if the order has at least one item in it
+bool orderHasItems()
+{
+    for (int i = 0; i < FOOD_COUNT; i++)
+    {
+        if (foodQuantities[i] > 0)
+            return true;
+    }
+
+    for (int i = 0; i < DRINK_COUNT; i++)
+    {
+        if (drinkQuantities[i] > 0)
+            return true;
+    }
+
+    return false;
+}
+
+
 void completeOrder()
 {
-    // TODO
-    // Call printBill() to display user's current order
-    // Prompt to Complete Order y/n
-    // Prompt to make another order or exit
+    if (!orderHasItems())
+    {
+        printf("\nYour order is empty! Please add some items first.\n");
+        return;
+    }
+
+    printBill();
+
+    printf("\nWould you like to complete this order?\n1) Yes\n0) No\n\n");
+    int confirm = -1;
+    gScanVal = scanf("%d", &confirm);
+
+    if (confirm != 1)
+    {
+        printf("\nReturning to main menu...\n");
+        return;
+    }
+
+    printf("\nOrder complete! Thank you!\n");
+
+    // Clear the order so the next one starts fresh
+    for (int i = 0; i < FOOD_COUNT; i++)
+        foodQuantities[i] = 0;
+
+    for (int i = 0; i < DRINK_COUNT; i++)
+        drinkQuantities[i] = 0;
+
+    printf("You can start a new order from the main menu, or press 0 to exit.\n");
+}
+
+
+// Prints every item with quantity > 0 and returns the section's total
+float printItems(const char *names[], float prices[], int quantities[], int count)
+{
+    float sectionTotal = 0;
+
+    for (int i = 0; i < count; i++)
+    {
+        if (quantities[i] == 0)
+            continue;
+
+        float lineTotal = quantities[i] * prices[i];
+        printf("%-15s    %3d        $%6.2f\n", names[i], quantities[i], lineTotal);
+        sectionTotal += lineTotal;
+    }
+
+    return sectionTotal;
 }
 
 
 void printBill()
 {
-    // TODO
-    // Print out the user's current order
-    // Should include:
-    //    1) Food/Drink Name
-    //    2) Quantity of Item
-    //    3) Price of Item(s)
-    //    4) Subtotal
-    //    5) Tax
-    //    6) Total (Subtotal + Tax)
+    float subtotal = 0;
+
+    printf("\n=============== YOUR BILL ===============\n");
+    printf("Item           Quantity     Price\n");
+    printf("-----------------------------------------\n");
+
+    subtotal += printItems(FOOD_NAMES, FOOD_PRICES, foodQuantities, FOOD_COUNT);
+    subtotal += printItems(DRINK_NAMES, DRINK_PRICES, drinkQuantities, DRINK_COUNT);
+
+    float tax = subtotal * (TAX_RATE - 1);
+    float total = subtotal + tax;
+
+    printf("-----------------------------------------\n");
+    printf("Subtotal:                    $%6.2f\n", subtotal);
+    printf("Tax (7.25%%):                 $%6.2f\n", tax);
+    printf("Total:                       $%6.2f\n", total);
+    printf("=========================================\n");
 }
 
 
